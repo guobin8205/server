@@ -1,2 +1,2 @@
 @echo off
-bash /mnt/e/game/server/run.sh
+bash /mnt/e/repos/server/run.sh

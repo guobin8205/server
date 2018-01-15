@@ -1,2 +1,2 @@
 @echo off
-bash /mnt/e/game/server/stop.sh
+bash /mnt/e/repos/server/stop.sh
