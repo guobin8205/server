@@ -135,16 +135,20 @@ function server.start(conf)
 	}
 
 	function handler.command(cmd, source, ...)
+		LOG_DEBUG("handler.command cmd=%s", cmd)
 		local f = assert(CMD[cmd])
 		return f(...)
 	end
 
 	function handler.open(source, gateconf)
+		LOG_DEBUG("handler.command source=%s", source)
+		dump(gateconf)
 		local servername = assert(gateconf.servername)
 		return conf.register_handler(servername)
 	end
 
 	function handler.connect(fd, addr)
+		LOG_DEBUG("handler.connect fd=%s", tostring(fd))
 		handshake[fd] = addr
 		gateserver.openclient(fd)
 	end

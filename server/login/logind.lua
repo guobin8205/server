@@ -1,6 +1,7 @@
 local login = require "snax.loginserver"
 local crypt = require "skynet.crypt"
 local skynet = require "skynet"
+local cluster = require "skynet.cluster"
 
 local server = {
 	host = "127.0.0.1",
@@ -25,8 +26,7 @@ function server.auth_handler(token)
 end
 
 function server.login_handler(server, uid, secret)
-	LOG_DEBUG(string.format("%s@%s is login, secret is %s", uid, server, crypt.hexencode(secret)))
-	print(string.format("%s@%s is login, secret is %s", uid, server, crypt.hexencode(secret)))
+	LOG_DEBUG(string.format("%s@%s is login, secret is %s", server, uid, crypt.hexencode(secret)))
 	local gameserver = assert(server_list[server], "Unknown server")
 	-- only one can login, because disallow multilogin
 	local last = user_online[uid]
@@ -37,14 +37,18 @@ function server.login_handler(server, uid, secret)
 		error(string.format("user %s is already online", uid))
 	end
 
-	local subid = tostring(skynet.call(gameserver, "lua", "login", uid, secret))
-	user_online[uid] = { address = gameserver, subid = subid , server = server}
+	local gate = cluster.query(server, "gated")
+	local gateserver = cluster.proxy(server, gate)
+
+	local subid = tostring(skynet.call(gateserver, "lua", "login", uid, secret))
+	user_online[uid] = { address = gateserver, subid = subid , server = server}
 	return subid
 end
 
 local CMD = {}
 
 function CMD.register_gate(server, address)
+	LOG_DEBUG("register_gate server=%s,address=%s", server, address)
 	server_list[server] = address
 end
 
@@ -57,6 +61,7 @@ function CMD.logout(uid, subid)
 end
 
 function server.command_handler(command, ...)
+	LOG_DEBUG("server.command_handler command=%s", command)
 	local f = assert(CMD[command])
 	return f(...)
 end

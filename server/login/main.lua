@@ -1,12 +1,10 @@
 local skynet = require "skynet"
+local cluster = require "skynet.cluster"
+
+local nodename = skynet.getenv("nodename")
 
 skynet.start(function()
-	local loginserver = skynet.newservice("logind")
-	local gate = skynet.newservice("gated", loginserver)
-
-	skynet.call(gate, "lua", "open" , {
-		port = 8888,
-		maxclient = 64,
-		servername = "sample",
-	})
+	local login = skynet.newservice("logind")
+	cluster.register("logind", login)
+	cluster.open(nodename)
 end)

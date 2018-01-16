@@ -10,6 +10,7 @@ luaservice = skynetroot .. "service/?.lua;" ..
 			"./luaservice/?.lua;"..
 			"./server/login/?.lua"
 
+cluster = "./config/clustername.lua"
 nodename = "$NODE_NAME"
 
 lualoader = skynetroot .. "lualib/loader.lua"
